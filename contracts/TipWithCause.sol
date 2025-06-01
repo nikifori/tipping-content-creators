@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+// @repository url: https://github.com/nikifori/tipping-content-creators
+// @testFile: https://github.com/nikifori/tipping-content-creators/blob/main/test/TipWithCause.test.js
 /**
  * @title TipWithCause
- * @author Kostas
+ * @author Konstantinos Nikiforidis
  * @notice A contract that facilitates tipping content creators while routing a
  *         configurable portion of each tip to a sponsored cause. The list of
  *         sponsored causes is supplied at deployment and kept private.
@@ -22,14 +24,14 @@ contract TipWithCause {
     // ---------------------------------------------------------------------
     // State
     // ---------------------------------------------------------------------
-    address public immutable owner;           // Deployer / contract owner.
-    address[] private sponsoredCauses;        // Hidden list of causes.
+    address public immutable owner; // Deployer / contract owner.
+    address[] private sponsoredCauses; // Hidden list of causes.
 
-    uint256 public totalTipped;               // Aggregate tips (wei).
-    address private highestTipper;            // Top tipper address.
-    uint256 private highestTipAmount;         // Top tip amount (wei).
+    uint256 public totalTipped; // Aggregate tips (wei).
+    address private highestTipper; // Top tipper address.
+    uint256 private highestTipAmount; // Top tip amount (wei).
 
-    bool public active;                       // Global switch.
+    bool public active; // Global switch.
 
     // ---------------------------------------------------------------------
     // Events
@@ -70,7 +72,10 @@ contract TipWithCause {
      * @param _causes Addresses of the sponsored causes.
      */
     constructor(address[] memory _causes) {
-        require(_causes.length > 0, "TipWithCause: at least one cause required");
+        require(
+            _causes.length > 0,
+            "TipWithCause: at least one cause required"
+        );
         owner = msg.sender;
         sponsoredCauses = _causes;
         active = true;
@@ -84,11 +89,10 @@ contract TipWithCause {
      * @param creator      Destination content‑creator address.
      * @param sponsorIndex Index of the chosen sponsored cause.
      */
-    function tip(address creator, uint256 sponsorIndex)
-        external
-        payable
-        whenActive
-    {
+    function tip(
+        address creator,
+        uint256 sponsorIndex
+    ) external payable whenActive {
         uint256 donation = msg.value / 10; // 10% donation.
         _processTip(creator, sponsorIndex, donation);
     }
@@ -106,9 +110,10 @@ contract TipWithCause {
         uint256 donationAmountWei
     ) external payable whenActive {
         uint256 minDonation = msg.value / 100; // 1 % of total.
-        uint256 maxDonation = msg.value / 2;   // 50 % of total.
+        uint256 maxDonation = msg.value / 2; // 50 % of total.
         require(
-            donationAmountWei >= minDonation && donationAmountWei <= maxDonation,
+            donationAmountWei >= minDonation &&
+                donationAmountWei <= maxDonation,
             "TipWithCause: donation outside allowed range"
         );
         _processTip(creator, sponsorIndex, donationAmountWei);
@@ -191,7 +196,13 @@ contract TipWithCause {
             highestTipper = msg.sender;
         }
 
-        emit TipReceived(msg.sender, creator, msg.value, donation, sponsorIndex);
+        emit TipReceived(
+            msg.sender,
+            creator,
+            msg.value,
+            donation,
+            sponsorIndex
+        );
     }
 
     // ---------------------------------------------------------------------
